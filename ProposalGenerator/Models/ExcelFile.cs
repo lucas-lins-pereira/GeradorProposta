@@ -1,26 +1,31 @@
 ﻿using ExcelDataReader;
 using Microsoft.AspNetCore.Http;
-using System;
 using System.Collections.Generic;
 using System.IO;
 
 namespace ProposalGenerator.Models
 {
-    public class ExcelFile : File<WorkSheet>
+    public class ExcelFile
     {
-        public ExcelFile(IFormFile formFile) : base(Path.GetFileNameWithoutExtension(formFile.FileName))
+        public ExcelFile(IFormFile formFile)
         {
             Read(formFile);
+            Name = Path.GetFileNameWithoutExtension(formFile.FileName);
         }
 
-        protected override void Read(IFormFile formFile)
+        public string Name { get; private set; }
+        public List<WorkSheet> Content { get; protected set; }
+
+        protected void Read(IFormFile formFile)
         {
             var listWorkSheets = new List<WorkSheet>();
             using var stream = formFile.OpenReadStream();
             using var reader = ExcelReaderFactory.CreateReader(stream);
             do
             {
-                var workSheet = new WorkSheet(reader.Name);
+                var name = reader.Name.Split('-');
+                var type = GetWorkSheetType(name[1]);
+                var workSheet = new WorkSheet(name[0], type);
                 while (reader.Read())
                 {
                     var row = new Row();
@@ -48,9 +53,14 @@ namespace ProposalGenerator.Models
             Content = listWorkSheets;
         }
 
-        protected override void Write(List<WorkSheet> contents)
+        private static WorkSheetTypeEnum GetWorkSheetType(string type)
         {
-            throw new NotImplementedException();
+            return (type.ToUpperInvariant()) switch
+            {
+                "TABELA" => WorkSheetTypeEnum.Table,
+                "CAMPO" => WorkSheetTypeEnum.Field,
+                _ => default,
+            };
         }
     }
 }
