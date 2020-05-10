@@ -1,32 +1,44 @@
-﻿using ProposalGenerator.Interfaces;
+﻿using Microsoft.AspNetCore.Http;
+using ProposalGenerator.Interfaces;
 using ProposalGenerator.Models;
 using ProposalGenerator.Models.Http;
 using System.Collections.Generic;
-using System.Net;
+using System.IO;
+using System.Threading.Tasks;
 using TemplateEngine.Docx;
 
 namespace ProposalGenerator.Services
 {
     public class GeneratorService : IGeneratorService
     {
-
-        public BaseResponse Create(RequestBody request)
+        public byte[] Create(RequestBody request)
         {
             var excelFile = new ExcelFile(request.ExcelFile);
+            var proposalContent = PrepareProposalContent(excelFile);
 
-            var content = PrepareTemplateContent(excelFile);
-
-            using (var outputDocument = new TemplateProcessor(request.TemplateFile.OpenReadStream())
-                .SetRemoveContentControls(true))
-            {
-                outputDocument.FillContent(content);
-                outputDocument.SaveChanges();
-            }
-
-            return new BaseResponse { StatusCode = HttpStatusCode.OK, Message = "Proposta gerada com sucesso.", Content = excelFile };
+            return GetProposalFileBytes(request.TemplateFile, proposalContent).Result;
         }
 
-        private Content PrepareTemplateContent(ExcelFile excelFile)
+        private static async Task<byte[]> GetProposalFileBytes(IFormFile templateFile, Content proposalContent)
+        {
+            byte[] bytes;
+            using (var memoryStream = new MemoryStream())
+            {
+                await templateFile.CopyToAsync(memoryStream);
+
+                using (var templateProcessor = new TemplateProcessor(memoryStream).SetRemoveContentControls(true))
+                {
+                    templateProcessor.FillContent(proposalContent);
+                    templateProcessor.SaveChanges();
+                }
+
+                bytes = memoryStream.ToArray();
+            }
+
+            return bytes;
+        }
+
+        private static Content PrepareProposalContent(ExcelFile excelFile)
         {
             var listTable = new List<TableContent>();
             var listFieldContent = new List<FieldContent>();
@@ -36,13 +48,22 @@ namespace ProposalGenerator.Services
                 {
                     case WorkSheetTypeEnum.Table:
                         var tableContent = new TableContent(workSheet.Name);
+                        if (tableContent.Rows == null)
+                        {
+                            var arrayHeaderRow = new FieldContent[workSheet.HeaderRow.Cells.Count];
+                            for (int column = 0; column < workSheet.HeaderRow.Cells.Count; column++)
+                                arrayHeaderRow[column] = new FieldContent(workSheet.HeaderRow.Cells[column], workSheet.HeaderRow.Cells[column]);
+
+                            tableContent.AddRow(arrayHeaderRow);
+                        }
+
                         foreach (var row in workSheet.Rows)
                         {
-                            var listRowField = new List<FieldContent>();
+                            var arrayRowField = new FieldContent[row.Cells.Count];
                             for (int column = 0; column < row.Cells.Count; column++)
-                                listRowField.Add(new FieldContent(workSheet.HeaderRow.Cells[column], row.Cells[column]));
+                                arrayRowField[column] = new FieldContent(workSheet.HeaderRow.Cells[column], row.Cells[column]);
 
-                            tableContent.AddRow(listRowField.ToArray());
+                            tableContent.AddRow(arrayRowField);
                         }
 
                         listTable.Add(tableContent);

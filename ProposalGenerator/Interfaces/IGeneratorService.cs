@@ -4,6 +4,6 @@ namespace ProposalGenerator.Interfaces
 {
     public interface IGeneratorService
     {
-        BaseResponse Create(RequestBody request);
+        byte[] Create(RequestBody request);
     }
 }

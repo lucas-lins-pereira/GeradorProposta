@@ -28,9 +28,12 @@ namespace ProposalGenerator
             var formData = await req.ReadFormAsync();
             var requestBody = new RequestBody { ExcelFile = formData.Files["Planilha"], TemplateFile = formData.Files["Template"] };
 
-            var result = _generatorService.Create(requestBody);
+            var resultBytes = _generatorService.Create(requestBody);
 
-            return new ObjectResult(result) { StatusCode = (int)result.StatusCode };
+            return new FileContentResult(resultBytes, "application/vnd.openxmlformats-officedocument.wordprocessingml.document")
+            {
+                FileDownloadName = "teste.docx",
+            };
         }
     }
 }
