@@ -13,10 +13,10 @@ namespace ProposalGenerator.Services
     {
         public byte[] Create(RequestBody request)
         {
-            var excelFile = new ExcelFile(request.ExcelFile);
-            var proposalContent = PrepareProposalContent(excelFile);
+            var excelFile = new ExcelFile(request.Planilha, request.SeparadorNomeTipo);
+            var proposalContent = PrepareProposalContent(excelFile, request.AlterarCabecalhoTemplate);
 
-            return GetProposalFileBytes(request.TemplateFile, proposalContent).Result;
+            return GetProposalFileBytes(request.Template, proposalContent).Result;
         }
 
         private static async Task<byte[]> GetProposalFileBytes(IFormFile templateFile, Content proposalContent)
@@ -38,7 +38,7 @@ namespace ProposalGenerator.Services
             return bytes;
         }
 
-        private static Content PrepareProposalContent(ExcelFile excelFile)
+        private static Content PrepareProposalContent(ExcelFile excelFile, bool changeTemplateHeader)
         {
             var listTable = new List<TableContent>();
             var listFieldContent = new List<FieldContent>();
@@ -48,7 +48,7 @@ namespace ProposalGenerator.Services
                 {
                     case WorkSheetTypeEnum.Table:
                         var tableContent = new TableContent(workSheet.Name);
-                        if (tableContent.Rows == null)
+                        if (tableContent.Rows == null && changeTemplateHeader)
                         {
                             var arrayHeaderRow = new FieldContent[workSheet.HeaderRow.Cells.Count];
                             for (int column = 0; column < workSheet.HeaderRow.Cells.Count; column++)

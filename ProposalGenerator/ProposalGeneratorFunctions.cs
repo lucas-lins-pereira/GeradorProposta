@@ -26,13 +26,19 @@ namespace ProposalGenerator
             log.LogInformation("C# HTTP trigger function processed a request.");
 
             var formData = await req.ReadFormAsync();
-            var requestBody = new RequestBody { ExcelFile = formData.Files["Planilha"], TemplateFile = formData.Files["Template"] };
+            var requestBody = new RequestBody(
+                planilha: formData.Files["Planilha"],
+                template: formData.Files["Template"],
+                separadorNomeTipo: formData["SeparadorNomeTipo"],
+                nomeArquivoSaida: formData["NomeArquivoSaida"],
+                alterarCabecalhoTemplate: formData["AlterarCabecalhoTemplate"]
+            );
 
             var resultBytes = _generatorService.Create(requestBody);
 
             return new FileContentResult(resultBytes, "application/vnd.openxmlformats-officedocument.wordprocessingml.document")
             {
-                FileDownloadName = "teste.docx",
+                FileDownloadName = $"{requestBody.NomeArquivoSaida}.docx",
             };
         }
     }

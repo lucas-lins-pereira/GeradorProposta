@@ -7,23 +7,23 @@ namespace ProposalGenerator.Models
 {
     public class ExcelFile
     {
-        public ExcelFile(IFormFile formFile)
+        public ExcelFile(IFormFile formFile, char separator)
         {
-            Read(formFile);
+            Read(formFile, separator);
             Name = Path.GetFileNameWithoutExtension(formFile.FileName);
         }
 
         public string Name { get; private set; }
         public List<WorkSheet> Content { get; protected set; }
 
-        protected void Read(IFormFile formFile)
+        protected void Read(IFormFile formFile, char separator)
         {
             var listWorkSheets = new List<WorkSheet>();
             using var stream = formFile.OpenReadStream();
             using var reader = ExcelReaderFactory.CreateReader(stream);
             do
             {
-                var name = reader.Name.Split('-');
+                var name = reader.Name.Split(separator);
                 var type = GetWorkSheetType(name[1]);
                 var workSheet = new WorkSheet(name[0], type);
                 while (reader.Read())
