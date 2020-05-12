@@ -10,7 +10,7 @@ namespace ProposalGenerator.Models.Http
             Planilha = planilha;
             Template = template;
             SeparadorNomeTipo = string.IsNullOrWhiteSpace(separadorNomeTipo) ? '-' : separadorNomeTipo.Trim().ToCharArray()[0];
-            NomeArquivoSaida = nomeArquivoSaida ?? DateTime.Now.ToString("yyyyMMddhhmmss");
+            NomeArquivoSaida = nomeArquivoSaida.Trim().Replace(" ", "_") ?? DateTime.Now.ToString("yyyyMMddhhmmss");
             SetAlterarCabecalhoTemplate(alterarCabecalhoTemplate);
         }
 

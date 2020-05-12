@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 using System.Net;
 
 namespace ProposalGenerator.Models.Http
@@ -9,6 +10,6 @@ namespace ProposalGenerator.Models.Http
         [JsonIgnore]
         public HttpStatusCode StatusCode { get; set; }
         public string Message { get; set; }
-        public dynamic Content { get; set; }
+        public FileContentResult File { get; set; }
     }
 }
