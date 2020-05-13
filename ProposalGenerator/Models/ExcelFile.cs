@@ -48,7 +48,7 @@ namespace ProposalGenerator.Models
                     {
                         var value = reader.GetValue(column)?.ToString();
                         if (value == null)
-                            break;
+                            value = string.Empty;
 
                         row.Cells.Add(value);
                     }
