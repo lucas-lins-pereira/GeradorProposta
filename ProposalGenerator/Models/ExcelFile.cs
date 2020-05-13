@@ -1,5 +1,6 @@
 ﻿using ExcelDataReader;
 using Microsoft.AspNetCore.Http;
+using ProposalGenerator.Extensions;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -45,13 +46,7 @@ namespace ProposalGenerator.Models
                 {
                     var row = new Row();
                     for (int column = 0; column < reader.FieldCount; column++)
-                    {
-                        var value = reader.GetValue(column)?.ToString();
-                        if (value == null)
-                            value = string.Empty;
-
-                        row.Cells.Add(value);
-                    }
+                        row.Cells.Add(reader.GetFormattedValue(column));
 
                     if (row.Cells.Count == 0)
                         continue;
