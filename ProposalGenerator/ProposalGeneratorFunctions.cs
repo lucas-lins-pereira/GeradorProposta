@@ -7,8 +7,10 @@ using Microsoft.Extensions.Logging;
 using ProposalGenerator.Interfaces;
 using ProposalGenerator.Models.Http;
 using System;
+using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
+using Path = System.IO.Path;
 
 namespace ProposalGenerator
 {
@@ -72,6 +74,17 @@ namespace ProposalGenerator
 
             if (request.Template == null)
                 return $"Campo {nameof(RequestBody.Template)} obrigatório.";
+
+            var planilhaExtensions = new[] { ".xlsx", ".xls", ".csv" };
+            var templateExtensions = new[] { ".docx", ".doc" };
+
+            var fileExtension = Path.GetExtension(request.Planilha.FileName).ToLowerInvariant();
+            if (!planilhaExtensions.Contains(fileExtension))
+                return $"Campo {nameof(RequestBody.Planilha)} inválido.";
+
+            fileExtension = Path.GetExtension(request.Template.FileName).ToLowerInvariant();
+            if (!templateExtensions.Contains(fileExtension))
+                return $"Campo {nameof(RequestBody.Template)} inválido.";
 
             return null;
         }
