@@ -41,6 +41,7 @@ namespace ProposalGenerator.Services
 
                 using (var templateProcessor = new TemplateProcessor(memoryStream).SetRemoveContentControls(true))
                 {
+                    templateProcessor.SetNoticeAboutErrors(false);
                     templateProcessor.FillContent(proposalContent);
                     templateProcessor.SaveChanges();
                 }
