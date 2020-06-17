@@ -14,9 +14,9 @@ namespace ProposalGenerator.Extensions
             if (formatString != null)
             {
                 var format = new NumberFormat(formatString);
-                return format.Format(value, culture ?? CultureInfo.InvariantCulture);
+                return format.Format(value, culture ?? new CultureInfo("pt-BR"));
             }
-            return Convert.ToString(value, culture ?? CultureInfo.InvariantCulture);
+            return Convert.ToString(value, culture ?? new CultureInfo("pt-BR"));
         }
     }
 }
