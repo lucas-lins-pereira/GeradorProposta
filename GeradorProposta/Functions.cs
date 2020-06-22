@@ -14,26 +14,26 @@ using Path = System.IO.Path;
 
 namespace ProposalGenerator
 {
-    public class ProposalGeneratorFunctions
+    public class Functions
     {
         private readonly IGeneratorService _generatorService;
 
-        public ProposalGeneratorFunctions(IGeneratorService generatorService)
+        public Functions(IGeneratorService generatorService)
         {
             _generatorService = generatorService;
         }
 
-        [FunctionName(nameof(ProposalGenerator))]
-        public async Task<IActionResult> ProposalGenerator(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "v1/proposal")] HttpRequest req,
+        [FunctionName(nameof(Gerar))]
+        public async Task<IActionResult> Gerar(
+            [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "v1/gerar")] HttpRequest req,
             ILogger log)
         {
-            log.LogInformation($"Função {nameof(ProposalGenerator)} iniciada.");
+            log.LogInformation($"Função {nameof(Gerar)} iniciada.");
 
             try
             {
                 var formData = await req.ReadFormAsync();
-                var requestBody = new RequestBody(
+                var body = new RequestBody(
                     planilha: formData.Files["Planilha"],
                     template: formData.Files["Template"],
                     separadorNomeTipo: formData["SeparadorNomeTipo"],
@@ -42,11 +42,11 @@ namespace ProposalGenerator
                 );
 
                 log.LogInformation($"Validar Request.");
-                var errorMessage = ValidateRequest(requestBody);
+                var errorMessage = ValidateRequest(body);
                 if (errorMessage != null)
                     return new ObjectResult(new BaseResponse { Message = errorMessage }) { StatusCode = (int)HttpStatusCode.BadRequest };
 
-                var result = _generatorService.Create(requestBody);
+                var result = _generatorService.Create(body);
                 if (result.File != null)
                 {
                     log.LogInformation($"Retornar arquivo gerado.");
@@ -63,7 +63,7 @@ namespace ProposalGenerator
             }
             finally
             {
-                log.LogInformation($"Função {nameof(ProposalGenerator)} finalizada.");
+                log.LogInformation($"Função {nameof(Gerar)} finalizada.");
             }
         }
 

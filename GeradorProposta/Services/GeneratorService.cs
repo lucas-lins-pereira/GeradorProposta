@@ -105,7 +105,7 @@ namespace ProposalGenerator.Services
         private string GetOutputFileName(List<WorkSheet> fileContent, string templateFileName)
         {
             string type;
-            if (templateFileName.Contains("TÉCNICO"))
+            if (templateFileName.Contains("TÉCNIC"))
                 type = "TÉCNICO";
             else if (templateFileName.Contains("COMERCIAL"))
                 type = "COMERCIAL";
