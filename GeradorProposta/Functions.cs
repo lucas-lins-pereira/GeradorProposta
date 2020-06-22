@@ -25,7 +25,7 @@ namespace ProposalGenerator
 
         [FunctionName(nameof(Gerar))]
         public async Task<IActionResult> Gerar(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "v1/gerar")] HttpRequest req,
+            [HttpTrigger(AuthorizationLevel.Function, "post", Route = "v1/gerar")] HttpRequest req,
             ILogger log)
         {
             log.LogInformation($"Função {nameof(Gerar)} iniciada.");
