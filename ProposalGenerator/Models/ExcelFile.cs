@@ -19,7 +19,7 @@ namespace ProposalGenerator.Models
         public string Name { get; private set; }
         public List<WorkSheet> Content { get; private set; }
 
-        protected void Read(IFormFile formFile, char separator)
+        private void Read(IFormFile formFile, char separator)
         {
             var listWorkSheets = new List<WorkSheet>();
             using var stream = formFile.OpenReadStream();

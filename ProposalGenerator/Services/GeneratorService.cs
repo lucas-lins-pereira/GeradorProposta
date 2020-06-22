@@ -5,6 +5,7 @@ using ProposalGenerator.Models;
 using ProposalGenerator.Models.Http;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using TemplateEngine.Docx;
@@ -22,12 +23,13 @@ namespace ProposalGenerator.Services
             var proposalContent = PrepareProposalContent(excelFile, request.AlterarCabecalhoTemplate);
             var bytes = GetProposalFileBytes(request.Template, proposalContent).Result;
 
+            var outputFileName = GetOutputFileName(excelFile.Content, request.Template.FileName.ToUpper()) ?? request.NomeArquivoSaida;
             return new BaseResponse
             {
                 StatusCode = HttpStatusCode.OK,
                 File = new FileContentResult(bytes, "application/vnd.openxmlformats-officedocument.wordprocessingml.document")
                 {
-                    FileDownloadName = $"{request.NomeArquivoSaida}.docx",
+                    FileDownloadName = $"{outputFileName}.docx",
                 }
             };
         }
@@ -85,7 +87,7 @@ namespace ProposalGenerator.Services
 
                     case WorkSheetTypeEnum.Field:
                         foreach (var row in workSheet.Rows)
-                            listFieldContent.Add(new FieldContent(row.Cells[0], row.Cells[1]));
+                            listFieldContent.Add(new FieldContent(row.Cells.FirstOrDefault(), row.Cells.LastOrDefault()));
                         break;
 
                     default:
@@ -98,6 +100,25 @@ namespace ProposalGenerator.Services
                 Tables = listTable,
                 Fields = listFieldContent
             };
+        }
+
+        private string GetOutputFileName(List<WorkSheet> fileContent, string templateFileName)
+        {
+            string type;
+            if (templateFileName.Contains("TÉCNICO"))
+                type = "TÉCNICO";
+            else if (templateFileName.Contains("COMERCIAL"))
+                type = "COMERCIAL";
+            else
+                return null;
+
+            foreach (var row in fileContent.FirstOrDefault(x => x.Type == WorkSheetTypeEnum.Field).Rows)
+            {
+                if (row.Cells.First().ToUpper().Contains($"NOME ARQUIVO {type}"))
+                    return row.Cells.LastOrDefault();
+            }
+
+            return null;
         }
     }
 }
